@@ -1,1 +1,1 @@
-# data-gui
+# PyQtSpreadsheet
