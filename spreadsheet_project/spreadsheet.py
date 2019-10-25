@@ -1,6 +1,7 @@
 import sys
 import os
 import csv
+import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QTableWidget, QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QFileDialog
 from PyQt5.QtWidgets import qApp, QAction
 
@@ -21,9 +22,11 @@ class MyTable(QTableWidget):
             row = self.currentRow()
             col = self.currentColumn()
             value = self.item(row, col)
-            value = value.text()
-            print("The current cell is ", row, ", ", col)
-            print("In this cell we have: ", value)
+            print(value)
+            if value:
+                value = value.text()
+                print("The current cell is ", row, ", ", col)
+                print("In this cell we have: ", value)
 
     def open_sheet(self):
         self.check_change = False
@@ -66,11 +69,92 @@ class MyTable(QTableWidget):
     def add_data(self):
         self.check_change = False
         # print('add_data called')
-        self.window = Window(self)
+        self.add_data_window = AddDataWindow(self)
         self.check_change = True
 
+    def plot_graph(self):
+        data = self.selectedItems()
+        d = [(dt.text()) for dt in data]
+        # print(d,type(d[0]))
+        d_len = len(d)
+        yd = d[:d_len//2]
+        xd = d[d_len//2:]
+        if '' in yd:
+            yd = yd[:yd.index('')]
+            xd = xd[:xd.index('')]
+        x = [int(i) for i in xd]
+        y = [int(i) for i in yd]
+        print(x)
+        print(y)
+        
+        self.plot_graph_window = PlotGraphWindow(x,y)
 
-class Window(QWidget):
+
+class PlotGraphWindow(QWidget):
+    
+    def __init__(self,xdata,ydata):
+        super().__init__()
+        self.xdata = xdata
+        self.ydata = ydata
+        self.xdata_str = str(xdata)
+        self.ydata_str = str(ydata)
+        self.init_ui()
+
+    def init_ui(self):
+        self.xdatalabel = QLabel('X-axis data: '+self.xdata_str)
+        self.ydatalabel = QLabel('Y-axis data: '+self.ydata_str)
+        self.title_label = QLabel('Enter the tilte of the plot:')
+        self.title = QLineEdit()
+        self.xlabels_label = QLabel('Enter the lable of the X-axis:')
+        self.xlabel = QLineEdit()
+        self.ylabels_label = QLabel('Enter the lable of the Y-axis:')
+        self.ylabel = QLineEdit()
+        self.plot_scatter = QPushButton('Plot Scatter Points')
+        self.plot_scatter_line = QPushButton('Plot Scatter Points with Smooth Lines')
+        self.plot_line = QPushButton('Plot Lines')
+
+        v_box = QVBoxLayout()
+        v_box.addWidget(self.xdatalabel)
+        v_box.addWidget(self.ydatalabel)
+        v_box.addWidget(self.title_label)
+        v_box.addWidget(self.title)
+        v_box.addWidget(self.xlabels_label)
+        v_box.addWidget(self.xlabel)
+        v_box.addWidget(self.ylabels_label)
+        v_box.addWidget(self.ylabel)
+        v_box.addWidget(self.plot_scatter)
+        v_box.addWidget(self.plot_scatter_line)
+        v_box.addWidget(self.plot_line)
+
+        self.setLayout(v_box)
+        self.setWindowTitle('Plot Graphs')
+
+        self.plot_scatter.clicked.connect(self.plotScatter)
+        self.plot_scatter_line.clicked.connect(self.plotScatterLine)
+        self.plot_line.clicked.connect(self.plotLine)
+
+        self.show()
+    
+    def plotScatter(self):
+        self.plot_type = 'bo'
+        self.plotGraph()
+
+    def plotScatterLine(self):
+        self.plot_type = '-bo'
+        self.plotGraph()
+
+    def plotLine(self):
+        self.plot_type = '-b'
+        self.plotGraph()
+
+    def plotGraph(self): 
+        plt.title(self.title.text())
+        plt.xlabel(self.xlabel.text())
+        plt.ylabel(self.xlabel.text())
+        plt.plot(self.xdata,self.ydata,self.plot_type)
+        plt.show()    
+
+class AddDataWindow(QWidget):
 
     def __init__(self,table):
         super().__init__()
@@ -82,19 +166,19 @@ class Window(QWidget):
         self.row_number = QLineEdit()
         self.label2 = QLabel('Enter the comma separated data corresponding to the entered row number')
         self.data = QLineEdit()
-        self.add = QPushButton('Add Data')
+        self.addData = QPushButton('Add Data')
 
         v_box = QVBoxLayout()
         v_box.addWidget(self.label1)
         v_box.addWidget(self.row_number)
         v_box.addWidget(self.label2)
         v_box.addWidget(self.data)
-        v_box.addWidget(self.add)
+        v_box.addWidget(self.addData)
 
         self.setLayout(v_box)
         self.setWindowTitle('Add New Data')
 
-        self.add.clicked.connect(self.data_added)
+        self.addData.clicked.connect(self.data_added)
 
         self.show()
 
@@ -155,6 +239,16 @@ class Sheet(QMainWindow):
         edit.addAction(edit_action)
 
         edit_action.triggered.connect(self.form_widget.edit_sheet)
+
+
+        plot = bar.addMenu('&Plot')
+        
+        plot_action = QAction('&Plot Data',self)
+        plot_action.setShortcut('Ctrl+P')
+
+        plot.addAction(plot_action)
+
+        plot_action.triggered.connect(self.form_widget.plot_graph)
 
         self.show()
 
