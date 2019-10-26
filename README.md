@@ -23,4 +23,4 @@ In this project, a spreadsheet application has been created. The application has
 
 ## Demo Video
 
-The demo video of the application is available [here].(https://youtu.be/UC-0lPpS5xQ)
+The demo video of the application is available [here](https://youtu.be/UC-0lPpS5xQ).
