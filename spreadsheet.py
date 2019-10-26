@@ -255,7 +255,7 @@ class PlotGraphWindow(QWidget):
     def init_ui(self):
         self.xdatalabel = QLabel('X-axis data: ' + self.xdata_str)
         self.ydatalabel = QLabel('Y-axis data: ' + self.ydata_str)
-        self.title_label = QLabel('Enter the tilte of the plot:')
+        self.title_label = QLabel('Enter the title of the plot:')
         self.title = QLineEdit()
         self.xlabels_label = QLabel('Enter the lable of the X-axis:')
         self.xlabel = QLineEdit()
